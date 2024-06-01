@@ -59,12 +59,11 @@ for (@datafile){
 my @myelement = keys  %myelement;
 map { s/^\s+|\s+$//g; } @myelement;
 die "No elements were found\n" unless (@myelement);
-my @temperature = ("300");#temperatures for QE_MD, only template for the following sed trim
+my @temperature = ("10");#temperatures for QE_MD, only template for the following sed trim
 my @pressure = ("0");#pressure for vc-md, only template for the following sed trim
 my $calculation = "vc-md";#set temperature and pressure to be 0 0 for scf
 my $stepsize = 20;#20 ~ 0.97 fs
-my $nstep = 100;#how many steps for md for vc-relax
-my $cell_dofree = "xy"; #need to check your system
+my $nstep = 300;#how many steps for md for vc-relax
 my $pseudo_dir = "/opt/QEpot/SSSP_efficiency_pseudos/";
 ####end of setting parameters
 ###get pot setting here!
@@ -228,7 +227,6 @@ for my $id (@datafile){
             nat => $para{natom},
             nstep => $nstep,
             cell_para => $cell,
-            cell_dofree => $cell_dofree,
             pot_spec => $species,
             starting_magnetization => $starting_magnetization,
             rho_cutoff => $rho_cutoff,
@@ -263,8 +261,8 @@ ntyp =  $QE_hr->{ntyp}
 occupations = 'smearing' !
 smearing = 'gaussian'
 degauss =   0.035
-ecutrho =   $QE_hr->{rho_cutoff}
-ecutwfc =   $QE_hr->{cutoff} 
+ecutrho =   $rho_cutoff
+ecutwfc =   $cutoff 
 ibrav = 0
 nat = $QE_hr->{nat}
 nosym = .TRUE.
@@ -279,7 +277,7 @@ mixing_beta =   0.2
 mixing_mode = 'plain' !'local-TF'
 mixing_ndim = 8 !set 4 or 3 if OOM-killer exists (out of memory)
 diagonalization = 'david' !set cg if if OOM-killer exists (out of memory). other types can be used for scf problem.
-diago_david_ndim = 2 !If david is used for diagonalization. set 2 if OOM-killer appears.
+diago_david_ndim = 4 !If david is used for diagonalization. set 2 if OOM-killer appears.
 /
 &IONS
 ion_dynamics = "beeman"
@@ -290,7 +288,7 @@ tempw = $QE_hr->{temp}
 !press_conv_thr = 0.1
 cell_dynamics = "pr"
 press = $QE_hr->{press}
-cell_dofree = "$QE_hr->{cell_dofree}"
+cell_dofree = "all"
 /
 K_POINTS {automatic}
 2 2 2 0 0 0
