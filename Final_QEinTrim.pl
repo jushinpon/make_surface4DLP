@@ -41,11 +41,11 @@ for my $qe (@QEin_MC){
    #     print "$_: $ele_pot{$_}\n";
    # }
    # die;
-    my $kpoint_temp = `grep -v '^[[:space:]]*\$' $qe|grep -A 1 K_POINTS|grep -v K_POINTS`;
-    $kpoint_temp =~ s/^\s+|\s+$//g;
-    my @k_temp = split(/\s+/,$kpoint_temp);
-    $k_temp[2] = 1;
-    my $kpoint = join(" ",@k_temp);
+    my $kpoint = `grep -v '^[[:space:]]*\$' $qe|grep -A 1 K_POINTS|grep -v K_POINTS`;
+    #$kpoint_temp =~ s/^\s+|\s+$//g;
+    #my @k_temp = split(/\s+/,$kpoint_temp);
+    #$k_temp[2] = 1;
+    #my $kpoint = join(" ",@k_temp);
     #print "$counter: $qe\n";
     #print "@magnet\n";
     #print "@pot\n";
@@ -55,6 +55,10 @@ for my $qe (@QEin_MC){
     my @QE_template =<$in>;
     close $in;
     map { s/^\s+|\s+$//g; } @QE_template;
+
+    my @temp_magnet = `grep starting_magnetization data2QE4MatCld/$QEin_name`;
+    map { s/^\s+|\s+$//g; } @temp_magnet;
+    my $temp_ntype = @temp_magnet;    
 
     # find the key lines to modify
     my $pl;#id number with ATOMIC_SPECIES
@@ -74,27 +78,39 @@ for my $qe (@QEin_MC){
     }
     #begin trimming
     #pot
-    print "1.***$qe\n";
-    for my $i (0 .. $ntype -1){
-        my @temp = split(/\s+/,$pot[$i]);
-        $QE_template[$pl+$i+1] = "$temp[0]     $ele_pot{$temp[0]}";
-        print "$pot[$i]\n";
-        print "$QE_template[$pl+$i+1]\n";
+    for my $i (0 .. $temp_ntype -1){
+        if($i < $ntype){
+            my @temp = split(/\s+/,$pot[$i]);
+            $QE_template[$pl+$i+1] = "$pot[$i]";
+            #$QE_template[$pl+$i+1] = "$temp[0]     $ele_pot{$temp[0]}";
+        }
+        else{
+            $QE_template[$pl+$i+1] = '!';
+        }
     }
-    print "2.$qe\n\n";
 
     #kpoint
     $QE_template[$kl + 1] = $kpoint;
     #mag
-     for my $i (0 .. $ntype -1){
-        my $temp = $start_mag[$i];
-        $QE_template[$temp] = $magnet[$i];
+     for my $i (0 .. $temp_ntype -1){
+        if($i < $ntype){
+            my $temp = $start_mag[$i];
+            $QE_template[$temp] = $magnet[$i];
+        }
+        else{
+            my $temp = $start_mag[$i];
+            $QE_template[$temp] = '!';
+        }
     }
     my $trimmed = join("\n",@QE_template);
     chomp $trimmed;
     open(FH, ">QE_trimmed/$QEin_name" ) or die $!;
     print FH $trimmed;
     close(FH);
+    #house keeping
+    `sed -i '/ntyp/c\  ntyp = $ntype' QE_trimmed/$QEin_name`;
+    `sed -i '/^!/d' QE_trimmed/$QEin_name`;
+    `sed -i '/^\$/d' QE_trimmed/$QEin_name`;   
    # #$QEin_name =~ s/\.in//g;
    # chomp ($QEin_path, $QEin_name);
    # my $output = "QEinByMatCld/$QEin_name";#mv ...

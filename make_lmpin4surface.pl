@@ -23,7 +23,7 @@ map { s/^\s+|\s+$//g; } @datafile;
 #recommend 1. 10 to 1210 
 my $temperatur_initial = 10;
 my $temperatur_end = 1210;
-my @pressure = ("0");#10000 in lammps for 1 Gpa
+my @pressure = ("-1.0");#10000 in lammps for 1 Gpa
 my $run_step = 600000;
 my $timestep = 0.001;
 my $tdamp = $timestep*100;
@@ -39,8 +39,8 @@ my $Potential_pb = join (" ",@pb_files);
 
 my $Potential_prod="$Potential_pb out_file md.out out_freq $out_freq";
 #for surface $box_relax,should be modified
-my $box_relax = "aniso 10.0";# y 10.0 z 10.0";#"x 200 y 200 z 200";#"aniso 0.0"; # a little compressed to get some compressed structures
-my $min_value = "0.0 0.0 50000 100000"; #etol ftol maxiter maxeval
+my $box_relax = "iso -1.0";# y 10.0 z 10.0";#"x 200 y 200 z 200";#"aniso 0.0"; # a little compressed to get some compressed structures
+my $min_value = "0.0 0.0 10000 20000"; #etol ftol maxiter maxeval
 ###NVT (0) or NPT (1) set
 my $ensemble = "1" ; # If the ensemble is npt or nvt. Set according to your own needs.
 my $ensemble_name;
@@ -154,7 +154,7 @@ velocity all scale $lmp_hr->{temperatur_initial}
 if " \${ensemble} == 0 " then &
 "fix 1 all nvt temp $lmp_hr->{temperatur_initial} $lmp_hr->{temperatur_end} $lmp_hr->{tdamp}" &
 else &
-"fix 1 all npt temp $lmp_hr->{temperatur_initial} $lmp_hr->{temperatur_end} $lmp_hr->{tdamp} aniso $lmp_hr->{press} $lmp_hr->{press} $lmp_hr->{pdamp}"
+"fix 1 all npt temp $lmp_hr->{temperatur_initial} $lmp_hr->{temperatur_end} $lmp_hr->{tdamp} iso $lmp_hr->{press} $lmp_hr->{press} $lmp_hr->{pdamp}"
 
 thermo 100
 thermo_style custom step temp density pxx pyy pzz pxy pxz pyz press pe
