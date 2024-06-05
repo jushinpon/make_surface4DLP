@@ -259,8 +259,8 @@ dt = $QE_hr->{dt}
 &SYSTEM
 ntyp =  $QE_hr->{ntyp}
 occupations = 'smearing' !
-smearing = 'gaussian'
-degauss =   0.035
+smearing = 'mp'
+degauss =   0.02
 ecutrho =   $rho_cutoff
 ecutwfc =   $cutoff 
 ibrav = 0
@@ -273,7 +273,7 @@ nspin = 2
 &ELECTRONS
 conv_thr =   2.d-6
 electron_maxstep = 200
-mixing_beta =   0.2
+mixing_beta =   0.1
 mixing_mode = 'plain' !'local-TF'
 mixing_ndim = 8 !set 4 or 3 if OOM-killer exists (out of memory)
 diagonalization = 'david' !set cg if if OOM-killer exists (out of memory). other types can be used for scf problem.
